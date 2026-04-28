@@ -10,7 +10,7 @@
             margin: 0;
             overflow: hidden;
             background-color: #000;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
             touch-action: manipulation;
         }
         .balloon {
@@ -18,9 +18,7 @@
             cursor: pointer;
             transition: transform 0.1s ease-out;
             filter: drop-shadow(0 5px 15px rgba(255,255,255,0.2));
-        }
-        .balloon:active {
-            transform: scale(1.2);
+            z-index: 10;
         }
         .pop-number {
             position: absolute;
@@ -30,22 +28,12 @@
             pointer-events: none;
             animation: fadeUp 1s forwards;
             text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            z-index: 30;
         }
         @keyframes fadeUp {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
             100% { transform: translate(-50%, -100%) scale(1.5); opacity: 0; }
         }
-        .star {
-            position: absolute;
-            color: #FFD700;
-            pointer-events: none;
-            animation: fall 2s linear forwards;
-        }
-        @keyframes fall {
-            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-        }
-        /* ゆらゆらアニメーション */
         .float-anim {
             animation: float 3s ease-in-out infinite;
         }
@@ -55,7 +43,6 @@
             50% { margin-top: var(--move-y2, 10px); margin-left: var(--move-x2, -10px); }
             75% { margin-top: var(--move-y3, -10px); margin-left: var(--move-x3, -10px); }
         }
-        /* クラッカーの紙吹雪アニメーション */
         .confetti {
             position: absolute;
             width: 15px;
@@ -64,11 +51,10 @@
             left: 50%;
             pointer-events: none;
             animation: blast 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            z-index: 45;
+            z-index: 60;
         }
         @keyframes blast {
             0% { transform: translate(0, 0) rotate(0deg) scale(0.5); opacity: 1; }
-            70% { opacity: 1; }
             100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1); opacity: 0; }
         }
         .hidden { display: none; }
@@ -76,19 +62,19 @@
 </head>
 <body>
 
-<!-- 設定画面 (先生用) -->
-<div id="settings-screen" class="fixed inset-0 bg-gray-900 text-white z-50 flex flex-col items-center justify-center p-6">
-    <h1 class="text-3xl font-bold mb-8">せんせい用の せってい</h1>
+<!-- Settings Screen -->
+<div id="settings-screen" class="fixed inset-0 bg-gray-900 text-white z-50 flex flex-col items-center justify-center p-6 overflow-y-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">せんせい用の せってい</h1>
     
-    <div class="w-full max-w-md space-y-8 bg-gray-800 p-8 rounded-2xl">
+    <div class="w-full max-w-md space-y-6 bg-gray-800 p-8 rounded-2xl shadow-2xl">
         <div>
-            <label class="block text-xl mb-4">ふうせんの かず: <span id="count-display" class="text-yellow-400 font-bold">5</span>こ</label>
+            <label class="block text-xl mb-2">ふうせんの かず: <span id="count-display" class="text-yellow-400 font-bold">5</span>こ</label>
             <input type="range" id="balloon-count" min="1" max="10" value="5" class="w-full h-4 bg-gray-700 rounded-lg appearance-none cursor-pointer">
         </div>
 
         <div class="flex items-center justify-between">
             <span class="text-xl">はいけいの いろ</span>
-            <input type="color" id="bg-color" value="#000000" class="w-14 h-14 p-1 bg-gray-700 border-none rounded cursor-pointer">
+            <input type="color" id="bg-color" value="#000000" class="w-12 h-12 p-1 bg-gray-700 border-none rounded cursor-pointer">
         </div>
 
         <div class="flex items-center justify-between">
@@ -100,7 +86,7 @@
         </div>
 
         <div>
-            <label class="block text-xl mb-4">うごきの はげしさ: <span id="speed-display" class="text-yellow-400 font-bold">3</span></label>
+            <label class="block text-xl mb-2">うごきの はげしさ: <span id="speed-display" class="text-yellow-400 font-bold">3</span></label>
             <input type="range" id="balloon-speed" min="1" max="5" value="3" class="w-full h-4 bg-gray-700 rounded-lg appearance-none cursor-pointer">
         </div>
 
@@ -113,7 +99,7 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <span class="text-xl">かずの じどうレベルアップ</span>
+            <span class="text-xl">かずの レベルアップ</span>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="auto-level-count-toggle" class="sr-only peer">
                 <div class="w-14 h-7 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-pink-500"></div>
@@ -121,41 +107,57 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <span class="text-xl">うごきの じどうレベルアップ</span>
+            <span class="text-xl">うごきの レベルアップ</span>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="auto-level-speed-toggle" class="sr-only peer">
                 <div class="w-14 h-7 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500"></div>
             </label>
         </div>
 
-        <button id="start-btn" class="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black text-2xl font-bold rounded-xl transition-colors">
-            学習をはじめる
+        <button id="start-btn" class="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black text-2xl font-bold rounded-xl shadow-lg transition-transform active:scale-95">
+            がくしゅうを はじめる
         </button>
     </div>
-    <p class="mt-6 text-gray-400 text-sm">画面をリロードするといつでも設定に戻れます</p>
 </div>
 
-<!-- メイン学習画面 -->
+<!-- Game Screen -->
 <div id="game-screen" class="relative w-screen h-screen hidden">
-    <!-- 残り個数のガイド -->
-    <div id="guide-dots" class="absolute top-6 left-6 flex space-x-2"></div>
-    
-    <!-- 設定に戻る隠しボタン (左上隅) -->
-    <div id="back-to-settings" class="absolute top-0 left-0 w-20 h-20 opacity-0 cursor-default"></div>
-
-    <div id="balloon-container" class="w-full h-full"></div>
+    <div id="guide-dots" class="absolute top-6 left-6 flex space-x-2 z-20"></div>
+    <div id="back-to-settings" class="absolute top-0 left-0 w-24 h-24 z-30 opacity-0"></div>
+    <div id="balloon-container" class="w-full h-full relative"></div>
 </div>
 
-<!-- ご褒美画面 -->
-<div id="reward-screen" class="fixed inset-0 bg-black bg-opacity-80 hidden flex flex-col items-center justify-center z-40">
-    <div id="reward-message" class="text-white text-6xl font-bold mb-8 animate-bounce">できた！</div>
-    <button id="retry-btn" class="px-8 py-4 bg-white text-black text-2xl rounded-full font-bold z-50">もういっかい</button>
+<!-- Clear Choice Screen -->
+<div id="choice-screen" class="fixed inset-0 bg-black bg-opacity-90 hidden flex flex-col items-center justify-center z-50 p-6">
+    <div class="text-white text-5xl font-bold mb-4">できた！</div>
+    <div id="play-counter-text" class="text-yellow-400 text-2xl mb-12">（いま 1かいめ だよ）</div>
+    
+    <div class="flex flex-col space-y-6 w-full max-w-sm">
+        <button id="continue-btn" class="w-full py-6 bg-green-500 text-white text-3xl rounded-2xl font-bold shadow-xl transition-transform active:scale-95">
+            つぎも やる！
+        </button>
+        <button id="stop-btn" class="w-full py-6 bg-gray-600 text-white text-3xl rounded-2xl font-bold shadow-xl transition-transform active:scale-95">
+            おしまい に する
+        </button>
+    </div>
+</div>
+
+<!-- Final Reward Screen -->
+<div id="final-screen" class="fixed inset-0 bg-black hidden flex flex-col items-center justify-center z-[100] p-6 text-center">
+    <div class="text-white text-7xl font-bold mb-8 animate-bounce">
+        たいへん よく<br>できました！
+    </div>
+    <div id="final-stats" class="text-yellow-400 text-3xl mb-12">5かい ぜんぶ クリア！</div>
+    <button id="reset-app-btn" class="px-12 py-6 bg-yellow-500 text-black text-3xl rounded-full font-bold shadow-2xl transition-transform active:scale-95">
+        さいしょに もどる
+    </button>
 </div>
 
 <script>
     const settingsScreen = document.getElementById('settings-screen');
     const gameScreen = document.getElementById('game-screen');
-    const rewardScreen = document.getElementById('reward-screen');
+    const choiceScreen = document.getElementById('choice-screen');
+    const finalScreen = document.getElementById('final-screen');
     const balloonContainer = document.getElementById('balloon-container');
     const guideDots = document.getElementById('guide-dots');
     
@@ -170,79 +172,37 @@
     const bgColorInput = document.getElementById('bg-color');
     const startBtn = document.getElementById('start-btn');
     const backBtn = document.getElementById('back-to-settings');
-    const retryBtn = document.getElementById('retry-btn');
-    const rewardMessage = document.getElementById('reward-message');
+
+    const continueBtn = document.getElementById('continue-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const resetAppBtn = document.getElementById('reset-app-btn');
+    const playCounterText = document.getElementById('play-counter-text');
+    const finalStats = document.getElementById('final-stats');
 
     let totalBalloons = 5;
     let poppedCount = 0;
-    let balloonsPos = []; // 配置済みの風船の座標を記録する配列
-    let playCount = 0; // 現在のプレイ回数を記録
-    const MAX_PLAY_COUNT = 5; // 5回で終了
-    const colors = ['#FF5252', '#448AFF', '#4CAF50', '#FFEB3B', '#E040FB', '#FF9800', '#00BCD4'];
+    let playCount = 0; 
+    const MAX_PLAYS = 5;
+    const colors = ['#FF5252', '#448AFF', '#4CAF50', '#FFEB3B', '#E040FB', '#FF9800', '#00BCD4', '#FF4081', '#7C4DFF', '#EEFF41'];
 
-    // 設定反映
+    // Reflect settings
     countInput.addEventListener('input', () => {
         countDisplay.textContent = countInput.value;
         totalBalloons = parseInt(countInput.value);
     });
-
     speedInput.addEventListener('input', () => {
         speedDisplay.textContent = speedInput.value;
     });
 
-    // 設定に戻る (左上を長押しで戻れるようにする)
+    // Back to settings (hidden button top-left)
     let backTimer;
-    backBtn.addEventListener('mousedown', () => { backTimer = setTimeout(() => location.reload(), 2000); });
+    const resetToHome = () => location.reload();
+    backBtn.addEventListener('mousedown', () => { backTimer = setTimeout(resetToHome, 2000); });
+    backBtn.addEventListener('touchstart', (e) => { e.preventDefault(); backTimer = setTimeout(resetToHome, 2000); });
     backBtn.addEventListener('mouseup', () => { clearTimeout(backTimer); });
+    backBtn.addEventListener('touchend', () => { clearTimeout(backTimer); });
 
-    // リトライ/次へボタンの処理
-    retryBtn.addEventListener('click', () => {
-        rewardScreen.classList.add('hidden');
-        
-        // 残っている紙吹雪を消す
-        document.querySelectorAll('.confetti').forEach(el => el.remove());
-
-        // 5回クリアした場合は設定画面に戻って終了
-        if (playCount >= MAX_PLAY_COUNT) {
-            location.reload();
-            return;
-        }
-
-        let countUp = false;
-        let speedUp = false;
-
-        // 数レベルアップ判定
-        if (autoLevelCountToggle.checked && totalBalloons < 10) {
-            totalBalloons++;
-            countInput.value = totalBalloons;
-            countDisplay.textContent = totalBalloons;
-            countUp = true;
-        }
-
-        // 動きレベルアップ判定
-        let currentSpeed = parseInt(speedInput.value);
-        if (autoLevelSpeedToggle.checked && motionToggle.checked && currentSpeed < 5) {
-            speedInput.value = currentSpeed + 1;
-            speedDisplay.textContent = speedInput.value;
-            speedUp = true;
-        }
-
-        // 音声フィードバック
-        if (countUp && speedUp) {
-            speak(`${totalBalloons}こ に なって、もっと はやく うごくよ！`);
-        } else if (countUp) {
-            speak(`${totalBalloons}こ に ちょうせん！`);
-        } else if (speedUp) {
-            speak("もっと はやく うごくよ！");
-        } else {
-            speak("もういっかい！");
-        }
-        
-        // 少し待ってから開始（音声と被らないように）
-        setTimeout(setupGame, 1000);
-    });
-
-    // 音声合成の準備
+    // Text to Speech
     const speak = (text) => {
         if (!voiceToggle.checked) return;
         window.speechSynthesis.cancel();
@@ -252,80 +212,79 @@
         window.speechSynthesis.speak(uttr);
     };
 
-    // 音声合成エンジンの初期化（IOSやブラウザの制限回避のため）
-    function initSpeech() {
-        if (voiceToggle.checked) {
-            const uttr = new SpeechSynthesisUtterance('');
-            uttr.volume = 0;
-            window.speechSynthesis.speak(uttr);
-        }
-    }
-
-    // 効果音 (Web Audio API)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Sound effects
+    let audioCtx;
     function playPopSound() {
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.1);
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
     }
 
-    // ゲーム開始
+    // Start learning session
     startBtn.addEventListener('click', () => {
-        audioCtx.resume();
-        initSpeech(); // 音声を鳴らせるように初期化
-        document.body.style.backgroundColor = bgColorInput.value; // 背景色を適用
+        if (audioCtx) audioCtx.resume();
+        document.body.style.backgroundColor = bgColorInput.value;
         settingsScreen.classList.add('hidden');
         gameScreen.classList.remove('hidden');
-        playCount = 0; // プレイ回数をリセット
+        playCount = 0;
         setupGame();
     });
+
+    // Choices
+    continueBtn.addEventListener('click', () => {
+        choiceScreen.classList.add('hidden');
+        applyLevelUps();
+        setupGame();
+    });
+
+    stopBtn.addEventListener('click', () => {
+        choiceScreen.classList.add('hidden');
+        showFinalEnding();
+    });
+
+    resetAppBtn.addEventListener('click', resetToHome);
 
     function setupGame() {
         balloonContainer.innerHTML = '';
         guideDots.innerHTML = '';
         poppedCount = 0;
-        balloonsPos = []; // 座標リセット
 
-        // ガイドのドット作成
+        // Visual guide dots
         for (let i = 0; i < totalBalloons; i++) {
             const dot = document.createElement('div');
-            dot.className = 'w-6 h-6 rounded-full bg-gray-700 border border-gray-500';
+            dot.className = 'w-6 h-6 rounded-full bg-gray-700 border border-gray-600 transition-all';
             dot.id = `dot-${i}`;
             guideDots.appendChild(dot);
         }
 
-        // 風船作成
+        // Create balloons
+        const existingPos = [];
+        const size = Math.min(window.innerWidth, window.innerHeight) * 0.22;
+        
         for (let i = 0; i < totalBalloons; i++) {
-            createBalloon(i);
+            createBalloon(i, size, existingPos);
         }
     }
 
-    function createBalloon(index) {
+    function createBalloon(index, size, existingPos) {
         const balloon = document.createElement('div');
         balloon.className = 'balloon';
         
         if (motionToggle.checked) {
             balloon.classList.add('float-anim');
-            
-            const speedLevel = parseInt(speedInput.value); // 1(ゆっくり) 〜 5(激しい)
-            
-            // アニメーションの速度と振り幅をはげしさレベルに応じて計算
-            // 速度: levelが大きいほど速い（durationが短い）
-            const baseDuration = 6 - speedLevel;
-            balloon.style.animationDuration = `${baseDuration * 0.6 + Math.random() * 1.5}s`;
-            balloon.style.animationDelay = `-${Math.random() * 5}s`;
-            
-            // 振り幅: levelが大きいほど広い範囲を動く
-            const range = speedLevel * 60 + 50; 
-            
+            const speedLevel = parseInt(speedInput.value); 
+            const baseDur = 6 - speedLevel;
+            balloon.style.animationDuration = `${baseDur * 0.7 + Math.random() * 1.5}s`;
+            const range = speedLevel * 40 + 30; 
             balloon.style.setProperty('--move-x1', `${(Math.random() - 0.5) * range}px`);
             balloon.style.setProperty('--move-y1', `${(Math.random() - 0.5) * range}px`);
             balloon.style.setProperty('--move-x2', `${(Math.random() - 0.5) * range}px`);
@@ -334,151 +293,142 @@
             balloon.style.setProperty('--move-y3', `${(Math.random() - 0.5) * range}px`);
         }
         
-        // 数が多いと重なりやすくなるので、少しサイズを小さめに設定
-        const size = Math.min(window.innerWidth, window.innerHeight) * 0.25;
-        const color = colors[index % colors.length];
-        
-        // 重ならないように座標を探す（最大100回試行）
-        let x, y;
-        let attempts = 0;
-        let overlapping = true;
-        while (overlapping && attempts < 100) {
-            x = Math.random() * (window.innerWidth - size);
-            y = Math.random() * (window.innerHeight - size * 1.2);
+        let x, y, overlapping = true, attempts = 0;
+        const pad = 30;
+        while (overlapping && attempts < 150) {
+            x = pad + Math.random() * (window.innerWidth - size - pad * 2);
+            y = pad + 80 + Math.random() * (window.innerHeight - size * 1.5 - pad - 80);
             overlapping = false;
-            for (let pos of balloonsPos) {
-                const dx = x - pos.x;
-                const dy = y - pos.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                // 中心同士の距離がサイズ以上離れていればOK（少し余裕を持たせる）
-                if (distance < size * 1.1) {
-                    overlapping = true;
-                    break;
-                }
+            for (let pos of existingPos) {
+                const dist = Math.sqrt((x-pos.x)**2 + (y-pos.y)**2);
+                if (dist < size * 0.9) { overlapping = true; break; }
             }
             attempts++;
         }
-        // 見つかった座標を記録
-        balloonsPos.push({x, y});
+        existingPos.push({x, y});
         
         balloon.style.left = `${x}px`;
         balloon.style.top = `${y}px`;
         balloon.style.width = `${size}px`;
         balloon.style.height = `${size * 1.2}px`;
         
-        // SVGで風船を描画
+        const color = colors[index % colors.length];
         balloon.innerHTML = `
             <svg viewBox="0 0 100 120" width="100%" height="100%">
                 <defs>
                     <radialGradient id="grad-${index}" cx="40%" cy="40%" r="50%" fx="30%" fy="30%">
-                        <stop offset="0%" style="stop-color:white;stop-opacity:0.3" />
+                        <stop offset="0%" style="stop-color:white;stop-opacity:0.4" />
                         <stop offset="100%" style="stop-color:${color};stop-opacity:1" />
                     </radialGradient>
                 </defs>
                 <ellipse cx="50" cy="50" rx="45" ry="50" fill="url(#grad-${index})" />
-                <path d="M50 100 L45 110 L55 110 Z" fill="${color}" />
+                <path d="M50 100 L43 110 L57 110 Z" fill="${color}" />
                 <path d="M50 110 Q55 115 50 120" stroke="white" stroke-width="2" fill="none" />
             </svg>
         `;
 
-        balloon.addEventListener('pointerdown', (e) => {
-            popBalloon(balloon, index, e.clientX, e.clientY);
-        });
+        const pop = (e) => {
+            e.preventDefault();
+            const cx = e.clientX || (e.touches && e.touches[0].clientX);
+            const cy = e.clientY || (e.touches && e.touches[0].clientY);
+            if (balloon.dataset.popped) return;
+            balloon.dataset.popped = "true";
+            
+            poppedCount++;
+            playPopSound();
+            speak(poppedCount.toString());
 
+            const num = document.createElement('div');
+            num.className = 'pop-number';
+            num.textContent = poppedCount;
+            num.style.left = `${cx}px`;
+            num.style.top = `${cy}px`;
+            document.body.appendChild(num);
+            setTimeout(() => num.remove(), 1000);
+
+            const dot = document.getElementById(`dot-${poppedCount - 1}`);
+            if (dot) dot.classList.add('bg-yellow-400', 'border-white', 'ring-4', 'ring-yellow-200');
+
+            balloon.style.transform = 'scale(1.8)';
+            balloon.style.opacity = '0';
+            setTimeout(() => balloon.remove(), 250);
+
+            if (poppedCount === totalBalloons) setTimeout(showClearChoice, 800);
+        };
+
+        balloon.addEventListener('pointerdown', pop);
         balloonContainer.appendChild(balloon);
     }
 
-    function popBalloon(element, index, x, y) {
-        if (element.dataset.popped) return;
-        element.dataset.popped = "true";
-        
-        poppedCount++;
-        playPopSound();
-        
-        // 数字の表示
-        const num = document.createElement('div');
-        num.className = 'pop-number';
-        num.textContent = poppedCount;
-        num.style.left = `${x}px`;
-        num.style.top = `${y}px`;
-        document.body.appendChild(num);
-        setTimeout(() => num.remove(), 1000);
-
-        // ガイドのドットを光らせる
-        const dot = document.getElementById(`dot-${poppedCount - 1}`);
-        if (dot) {
-            dot.className = 'w-6 h-6 rounded-full bg-yellow-400 border border-white shadow-lg';
+    function showClearChoice() {
+        playCount++;
+        if (playCount >= MAX_PLAYS) {
+            showFinalEnding();
+            return;
         }
 
-        // 音声読み上げ
-        speak(poppedCount.toString());
-
-        // 風船を消す
-        element.style.transform = 'scale(2)';
-        element.style.opacity = '0';
-        setTimeout(() => element.remove(), 200);
-
-        // 全部割ったかチェック
-        if (poppedCount === totalBalloons) {
-            setTimeout(showReward, 1000);
-        }
+        speak("できた！ つぎも やる？ それとも おしまい？");
+        playCounterText.textContent = `（いま ${playCount}かいめ だよ）`;
+        choiceScreen.classList.remove('hidden');
+        fireConfetti(100);
     }
 
-    function showReward() {
-        rewardScreen.classList.remove('hidden');
-        playCount++; // クリア回数を追加
-        
-        let confettiAmount = 150; // 通常の紙吹雪の量
+    function applyLevelUps() {
+        let text = "もういっかい！";
+        let countUp = false, speedUp = false;
 
-        if (playCount >= MAX_PLAY_COUNT) {
-            // 5回終了時の大クリア演出
-            speak("5かい できたね！ おしまい！ よく がんばりました！");
-            rewardMessage.textContent = "おしまい！";
-            retryBtn.textContent = "せってい に もどる";
-            confettiAmount = 300; // 紙吹雪を倍にして盛大に祝う
-        } else {
-            // 通常クリア時の演出
-            speak("できたね！すごい！");
-            rewardMessage.textContent = "できた！";
-            
-            const hasNextCount = autoLevelCountToggle.checked && totalBalloons < 10;
-            const hasNextSpeed = autoLevelSpeedToggle.checked && motionToggle.checked && parseInt(speedInput.value) < 5;
-
-            if (hasNextCount || hasNextSpeed) {
-                retryBtn.textContent = "つぎの レベルへ！";
-            } else {
-                retryBtn.textContent = "もういっかい！";
-            }
+        if (autoLevelCountToggle.checked && totalBalloons < 10) {
+            totalBalloons++;
+            countInput.value = totalBalloons;
+            countDisplay.textContent = totalBalloons;
+            countUp = true;
         }
+        let spd = parseInt(speedInput.value);
+        if (autoLevelSpeedToggle.checked && motionToggle.checked && spd < 5) {
+            spd++;
+            speedInput.value = spd;
+            speedDisplay.textContent = spd;
+            speedUp = true;
+        }
+
+        if (countUp && speedUp) text = `${totalBalloons}こ に なって、もっと はやく うごくよ！`;
+        else if (countUp) text = `${totalBalloons}こ に ちょうせん！`;
+        else if (speedUp) text = "もっと はやく うごくよ！";
         
-        // 激しいクラッカーエフェクト（紙吹雪）
-        const confettiColors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#42b983', '#00BCD4'];
-        for (let i = 0; i < confettiAmount; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-            
-            // 四角形や細長い形をランダムに
-            if (Math.random() > 0.5) confetti.style.borderRadius = '50%';
-            confetti.style.width = (Math.random() * 15 + 5) + 'px';
-            confetti.style.height = (Math.random() * 20 + 10) + 'px';
+        speak(text);
+    }
 
-            // 飛び散る方向と距離を計算
-            const tx = (Math.random() - 0.5) * window.innerWidth * 1.5;
-            const ty = - (Math.random() * window.innerHeight * 1.2 + 100);
-            const rot = Math.random() * 1080; // ぐるぐる回転
+    function showFinalEnding() {
+        gameScreen.classList.add('hidden');
+        finalScreen.classList.remove('hidden');
+        finalStats.textContent = `${playCount}かい クリア！ すごいね！`;
+        speak(`たいへん よく できました！ ${playCount}かい も できたね！ おしまい！`);
+        
+        // Endless confetti for final
+        const interval = setInterval(() => {
+            if (finalScreen.classList.contains('hidden')) clearInterval(interval);
+            fireConfetti(20);
+        }, 500);
+        fireConfetti(300);
+    }
 
-            confetti.style.setProperty('--tx', `${tx}px`);
-            confetti.style.setProperty('--ty', `${ty}px`);
-            confetti.style.setProperty('--rot', `${rot}deg`);
-            
-            // 吹き出すタイミングを少しずらす
-            confetti.style.animationDelay = `${Math.random() * 0.3}s`;
-
-            document.body.appendChild(confetti);
-            
-            // アニメーションが終わったら消す
-            setTimeout(() => confetti.remove(), 3500);
+    function fireConfetti(amount) {
+        const confColors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#42b983', '#00BCD4'];
+        for (let i = 0; i < amount; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.backgroundColor = confColors[Math.floor(Math.random() * confColors.length)];
+            if (Math.random() > 0.5) c.style.borderRadius = '50%';
+            c.style.width = (Math.random() * 12 + 6) + 'px';
+            c.style.height = (Math.random() * 18 + 10) + 'px';
+            const tx = (Math.random() - 0.5) * window.innerWidth * 1.8;
+            const ty = - (Math.random() * window.innerHeight * 1.3 + 150);
+            c.style.setProperty('--tx', `${tx}px`);
+            c.style.setProperty('--ty', `${ty}px`);
+            c.style.setProperty('--rot', `${Math.random() * 1080}deg`);
+            c.style.animationDelay = `${Math.random() * 0.8}s`;
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 3500);
         }
     }
 </script>
